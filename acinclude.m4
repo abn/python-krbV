@@ -37,29 +37,29 @@ AC_DEFUN([AM_PATH_PYTHON_JH],
   dnl in 1.5, and I don't want to maintain that logic.
 
   dnl should we do the version check?
-  ifelse([$1],[AC_PATH_PROG(PYTHON, python python2.3 python2.2 python2.1 python2.0 python1.6 python1.5)],,[
+  ifelse([$1],[AC_PATH_PROG(PYTHON, python python3.2 python2.3 python2.2 python2.1 python2.0 python1.6 python1.5)],,[
   foundit=false
   AC_MSG_CHECKING(if Python version >= $1)
- for PYTHON_BASE in python2.3 python2.2 python2.1 python2.0 python1.6 python1.5 python; do
+ for PYTHON_BASE in python3.2 python2.3 python2.2 python2.1 python2.0 python1.6 python1.5 python; do
     AC_PATH_PROG(PYTHON, $PYTHON_BASE)
     changequote(<<, >>)dnl
     prog="
 import sys, string
 minver = '$1'
-pyver = string.split(sys.version)[0]  # first word is version string
+pyver = sys.version.split()[0]  # first word is version string
 # split strings by '.' and convert to numeric
-minver = map(string.atoi, string.split(minver, '.'))
+minver = tuple(map( int , minver.split('.')))
 if hasattr(sys, 'version_info'):
     pyver = sys.version_info[:3]
 else:
-    pyver = map(string.atoi, string.split(pyver, '.'))
-# we can now do comparisons on the two lists:
+    pyver = tuple(map( int , pyver.split('.')))
+# we can now do comparisons on the two tuples:
 if pyver >= minver:
-	print '%s >= %s' % (pyver, minver)
-        sys.exit(0)
+	print('%s >= %s'%(pyver, minver))
+	sys.exit(0)
 else:
-	print 'NOT TRUE: %s >= %s' % (pyver, minver)
-        sys.exit(1)"
+	print('NOT TRUE: %s >= %s'%(pyver, minver))
+	sys.exit(1)"
     changequote([, ])dnl
     if $PYTHON -c "$prog" 1>&AC_FD_CC 2>&AC_FD_CC
     then
@@ -84,7 +84,7 @@ else:
 
   AC_SUBST(PYTHON_VERSION)
   changequote(<<, >>)dnl
-  PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[:3]"`
+  PYTHON_VERSION=`$PYTHON -c "import sys; print(sys.version[:3])"`
   changequote([, ])dnl
 
 
@@ -103,7 +103,7 @@ else:
   dnl to know which OS platform Python thinks this is.
 
   AC_SUBST(PYTHON_PLATFORM)
-  PYTHON_PLATFORM=`$PYTHON -c "import sys; print sys.platform"`
+  PYTHON_PLATFORM=`$PYTHON -c "import sys; print(sys.platform)"`
 
 
   dnl Set up 4 directories:
@@ -187,8 +187,8 @@ AC_DEFUN([AM_CHECK_PYTHON_HEADERS],
 [AC_REQUIRE([AM_PATH_PYTHON_JH])
 AC_MSG_CHECKING(for headers required to compile python extensions)
 dnl deduce PYTHON_INCLUDES
-py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
-py_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
+py_prefix=`$PYTHON -c "import sys; print(sys.prefix)"`
+py_exec_prefix=`$PYTHON -c "import sys; print(sys.exec_prefix)"`
 PYTHON_INCLUDES="-I${py_prefix}/include/python${PYTHON_VERSION}"
 if test "$py_prefix" != "$py_exec_prefix"; then
   PYTHON_INCLUDES="$PYTHON_INCLUDES -I${py_exec_prefix}/include/python${PYTHON_VERSION}"
